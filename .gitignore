@@ -1,0 +1,25 @@
+*.sw[po]
+*.py[oc]
+.DS_Store
+
+# Packaging
+dist
+build/
+django_oscar_vat_moss.egg-info/
+docs/_build
+
+# Testing
+htmlcov
+.tox
+.coverage
+.coveralls.yml
+
+# Database
+sandbox/db.sqlite
+
+# Sensitive data
+TODO
+integration.py
+
+# Sandbox
+sandbox/public/media
