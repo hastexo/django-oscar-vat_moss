@@ -5,6 +5,7 @@ language: python
 
 env:
   # Generated with https://www.dominicrodger.com/tox-and-travis.html
+  - TOX_ENV=flake8
   - TOX_ENV=py27-django17-oscar10
   - TOX_ENV=py27-django17-oscar11
   - TOX_ENV=py27-django18-oscar10
