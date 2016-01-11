@@ -2,6 +2,7 @@ from oscar.apps.checkout import session
 
 from . import vat
 
+
 class CheckoutSessionMixin(session.CheckoutSessionMixin):
 
     def build_submission(self, **kwargs):

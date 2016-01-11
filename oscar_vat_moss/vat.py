@@ -4,6 +4,7 @@ import vat_moss.billing_address
 import vat_moss.id
 import vat_moss.phone_number
 
+
 def apply_to(submission):
     city = submission['line4']
     country = submission['country']
@@ -29,6 +30,7 @@ def apply_to(submission):
     shipping_charge.tax = calculate_tax(
         shipping_charge.excl_tax, rate)
 
+
 def lookup_vat(city=None,
                country=None,
                postcode=None,
@@ -37,26 +39,26 @@ def lookup_vat(city=None,
     verifications = 0
     address_vat_rate = None
     phone_vat_rate = None
-    
+
     # We already validated the VATIN through a form validator;
     # additional errors here shouldn't happen.
     if vatin:
         (vatin_country,
          vatin_normalized,
          vatin_company) = vat_moss.id.validate(unicode(vatin))
-        
+
     # TODO: check here whether or not the returned company name
     # matches the billing address.
 
     # TODO: Set effective tax rate to zero IFF VATIN verifies and the
     # country doesn't match the store's own country.
-    
+
     try:
         if city and country:
             address_vat_rate = lookup_vat_by_address(country,
                                                      postcode,
                                                      city)
-            verifications+=1
+            verifications += 1
     except:
         # We'll try the next one
         pass
@@ -65,14 +67,15 @@ def lookup_vat(city=None,
         if phone_number:
             phone_vat_rate = lookup_vat_by_phone_number(phone_number,
                                                         country)
-            verifications+=1
+            verifications += 1
     except:
         pass
-    
+
     # TODO: Raise an error if we don't have 2 verifications
 
     # TODO: Verify here that the calculated rates actually match
     return address_vat_rate or phone_vat_rate
+
 
 def lookup_vat_by_address(country=None, postcode=None, city=None):
     # exception is a statutory VAT exception,
@@ -84,6 +87,7 @@ def lookup_vat_by_address(country=None, postcode=None, city=None):
                                                           unicode(city))
     return rate
 
+
 def lookup_vat_by_phone_number(phone_number=None, country=None):
     # exception is a statutory VAT exception,
     # *not* a Python error!
@@ -92,6 +96,7 @@ def lookup_vat_by_phone_number(phone_number=None, country=None):
      exception) = vat_moss.phone_number.calculate_rate(unicode(phone_number),
                                                        unicode(country))
     return rate
+
 
 def calculate_tax(price, rate):
     tax = price * rate

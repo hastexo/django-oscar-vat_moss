@@ -1,17 +1,19 @@
 from django.db.models.fields import CharField
 from django.core import validators
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 from oscar.forms import fields
 
 import vat_moss.id
 
 # The longest VAT IDs are currently 2-letter country code + 15
 # characters. Make the max_length 32 to be on the safe side.
-DEFAULT_MAX_LENGTH=32
+DEFAULT_MAX_LENGTH = 32
+
 
 class VATINField(CharField):
     def __init__(self, verbose_name=None, name=None,
                  verify_exists=None, **kwargs):
-        
         kwargs['max_length'] = kwargs.get('max_length', DEFAULT_MAX_LENGTH)
         CharField.__init__(self, verbose_name, name, **kwargs)
         validator = VATINValidator()
@@ -24,7 +26,7 @@ class VATINField(CharField):
             'form_class': fields.VATINField,
         }
         defaults.update(kwargs)
-        return super(ExtendedURLField, self).formfield(**defaults)
+        return super(CharField, self).formfield(**defaults)
 
     def deconstruct(self):
         """
@@ -45,7 +47,7 @@ class VATINValidator(validators.BaseValidator):
     def validate_vatin(self, value):
         """Validate a VATIN and check that it exists.
 
-        :raises: 
+        :raises:
             ValidationError wrapping one of the following errors from
             vat_moss.id:
                 ValueError - If the is not a string or is not in the

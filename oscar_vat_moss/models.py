@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from . import fields
 
+
 class AbstractShippingAddress(models.AbstractShippingAddress):
     vatin = fields.VATINField(
         _('VAT Identification Number (VATIN)'),

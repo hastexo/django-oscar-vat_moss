@@ -1,8 +1,10 @@
-from oscar.apps.partner import strategy, prices
+from oscar.apps.partner import strategy
+
 
 class Selector(object):
     def strategy(self, request=None, user=None, **kwargs):
         return VATStrategy(request)
+
 
 class VATStrategy(strategy.UseFirstStockRecord, strategy.DeferredTax,
                   strategy.StockRequired, strategy.Structured):
