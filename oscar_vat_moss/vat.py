@@ -43,7 +43,7 @@ def lookup_vat(city=None,
     if vatin:
         (vatin_country,
          vatin_normalized,
-         vatin_company) = vat_moss.id.validate(vatin)
+         vatin_company) = vat_moss.id.validate(unicode(vatin))
         
     # TODO: check here whether or not the returned company name
     # matches the billing address.
@@ -79,9 +79,9 @@ def lookup_vat_by_address(country=None, postcode=None, city=None):
     # *not* a Python error!
     (rate,
      country,
-     exception) = vat_moss.billing_address.calculate_rate(country,
-                                                          postcode,
-                                                          city)
+     exception) = vat_moss.billing_address.calculate_rate(unicode(country),
+                                                          unicode(postcode),
+                                                          unicode(city))
     return rate
 
 def lookup_vat_by_phone_number(phone_number=None, country=None):
@@ -89,8 +89,8 @@ def lookup_vat_by_phone_number(phone_number=None, country=None):
     # *not* a Python error!
     (rate,
      country,
-     exception) = vat_moss.phone_number.calculate_rate(phone_number,
-                                                       country)
+     exception) = vat_moss.phone_number.calculate_rate(unicode(phone_number),
+                                                       unicode(country))
     return rate
 
 def calculate_tax(price, rate):

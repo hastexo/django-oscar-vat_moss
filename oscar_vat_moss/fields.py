@@ -60,7 +60,9 @@ class VATINValidator(validators.BaseValidator):
                 urllib.error.URLError/urllib2.URLError - If there is
                 an issue communicating with VIES or data.brreg.no
         """
+        # vat_moss expects that all strings are unicode, so force it
+        # here.
         try:
-            vat_moss.id.validate(value)
+            vat_moss.id.validate(unicode(value))
         except Exception as e:
             raise ValidationError(_(str(e)))
