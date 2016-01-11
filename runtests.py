@@ -42,11 +42,7 @@ if not settings.configured:
             'django.contrib.sites',
             'django.contrib.flatpages',
             'django.contrib.staticfiles',
-            'oscar_vat_moss',
-            'compressor',
-        ] + get_core_apps([
-            'tests.shipping',
-        ]),
+        ] + get_core_apps([]),
         MIDDLEWARE_CLASSES=(
             'django.middleware.common.CommonMiddleware',
             'django.contrib.sessions.middleware.SessionMiddleware',
