@@ -42,7 +42,7 @@ if not settings.configured:
             'django.contrib.sites',
             'django.contrib.flatpages',
             'django.contrib.staticfiles',
-            'paypal',
+            'oscar_vat_moss',
             'compressor',
         ] + get_core_apps([
             'tests.shipping',

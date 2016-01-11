@@ -77,17 +77,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/django-oscar-paypal.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/django-oscar-vat_moss.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/django-oscar-paypal.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/django-oscar-vat_moss.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/django-oscar-paypal"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/django-oscar-paypal"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/django-oscar-vat_moss"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/django-oscar-vat_moss"
 	@echo "# devhelp"
 
 epub:
