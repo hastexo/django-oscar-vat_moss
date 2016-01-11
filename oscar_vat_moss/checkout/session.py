@@ -1,6 +1,5 @@
 from oscar.apps.checkout import session
-
-from . import vat
+from oscar_vat_moss import vat
 
 
 class CheckoutSessionMixin(session.CheckoutSessionMixin):
