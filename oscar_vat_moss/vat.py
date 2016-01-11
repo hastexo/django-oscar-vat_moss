@@ -6,17 +6,7 @@ import vat_moss.phone_number
 
 
 def apply_to(submission):
-    city = submission['line4']
-    country = submission['country']
-    postcode = submission['postcode']
-    phone_number = submission['phone_number']
-    vatin = submission['vatin']
-
-    rate = lookup_vat(city=city,
-                      country=country,
-                      postcode=postcode,
-                      phone_number=phone_number,
-                      vatin=vatin)
+    rate = lookup_vat(submission)
 
     for line in submission['basket'].all_lines():
         line_tax = calculate_tax(
@@ -31,11 +21,14 @@ def apply_to(submission):
         shipping_charge.excl_tax, rate)
 
 
-def lookup_vat(city=None,
-               country=None,
-               postcode=None,
-               phone_number=None,
-               vatin=None):
+def lookup_vat(submission):
+    # Use dict.get here so we default to None for non-existing fields
+    city = submission.get('line4')
+    country = submission.get('country')
+    postcode = submission.get('postcode')
+    phone_number = submission.get('phone_number')
+    vatin = submission.get('vatin')
+
     verifications = 0
     address_vat_rate = None
     phone_vat_rate = None
@@ -82,9 +75,9 @@ def lookup_vat_by_address(country=None, postcode=None, city=None):
     # *not* a Python error!
     (rate,
      country,
-     exception) = vat_moss.billing_address.calculate_rate(unicode(country),
-                                                          unicode(postcode),
-                                                          unicode(city))
+     exception) = vat_moss.billing_address.calculate_rate(to_unicode(country),
+                                                          to_unicode(postcode),
+                                                          to_unicode(city))
     return rate
 
 
@@ -93,11 +86,17 @@ def lookup_vat_by_phone_number(phone_number=None, country=None):
     # *not* a Python error!
     (rate,
      country,
-     exception) = vat_moss.phone_number.calculate_rate(unicode(phone_number),
-                                                       unicode(country))
+     exception) = vat_moss.phone_number.calculate_rate(to_unicode(phone_number),
+                                                       to_unicode(country))
     return rate
 
 
 def calculate_tax(price, rate):
     tax = price * rate
     return tax.quantize(D('0.01'))
+
+
+def to_unicode(s):
+    # vat_moss wants all strings in Unicode, or None if a string isn't
+    # included in the submission
+    return None if s is None else unicode(s)
