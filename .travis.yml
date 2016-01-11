@@ -3,28 +3,16 @@ sudo: false
 
 language: python
 
-env:
-  # Generated with https://www.dominicrodger.com/tox-and-travis.html
-  - TOX_ENV=flake8
-  - TOX_ENV=py27-django17-oscar10
-  - TOX_ENV=py27-django17-oscar11
-  - TOX_ENV=py27-django18-oscar10
-  - TOX_ENV=py27-django18-oscar11
-  - TOX_ENV=py33-django17-oscar10
-  - TOX_ENV=py33-django17-oscar11
-  - TOX_ENV=py33-django18-oscar10
-  - TOX_ENV=py33-django18-oscar11
-  - TOX_ENV=py34-django17-oscar10
-  - TOX_ENV=py34-django17-oscar11
-  - TOX_ENV=py34-django18-oscar10
-  - TOX_ENV=py34-django18-oscar11
-
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
 
 install:
-    - pip install tox
+    - pip install tox-travis
 
 script:
-    - tox -e $TOX_ENV
+    - tox
 
 notifications:
   email: true
