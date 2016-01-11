@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-from paypal import VERSION
-
+from oscar_vat_moss import get_version
 
 setup(
     name='django-oscar-vat_moss',
-    version=VERSION,
+    version=get_version(),
     url='https://github.com/hastexo/django-oscar-vat_moss',
     description=(
         "EU VATMOSS support for django-oscar"),
