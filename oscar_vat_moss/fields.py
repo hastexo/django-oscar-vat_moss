@@ -6,6 +6,8 @@ from oscar.forms import fields
 
 import vat_moss.id
 
+from oscar_vat_moss.util import u
+
 # The longest VAT IDs are currently 2-letter country code + 15
 # characters. Make the max_length 32 to be on the safe side.
 DEFAULT_MAX_LENGTH = 32
@@ -65,6 +67,6 @@ class VATINValidator(validators.BaseValidator):
         # vat_moss expects that all strings are unicode, so force it
         # here.
         try:
-            vat_moss.id.validate(unicode(value))
+            vat_moss.id.validate(u(value))
         except Exception as e:
             raise ValidationError(_(str(e)))

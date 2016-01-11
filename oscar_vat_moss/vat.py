@@ -4,6 +4,8 @@ import vat_moss.billing_address
 import vat_moss.id
 import vat_moss.phone_number
 
+from oscar_vat_moss.util import u
+
 
 def apply_to(submission):
     rate = lookup_vat(submission)
@@ -38,7 +40,7 @@ def lookup_vat(submission):
     if vatin:
         (vatin_country,
          vatin_normalized,
-         vatin_company) = vat_moss.id.validate(unicode(vatin))
+         vatin_company) = vat_moss.id.validate(u(vatin))
 
     # TODO: check here whether or not the returned company name
     # matches the billing address.
@@ -75,9 +77,9 @@ def lookup_vat_by_address(country=None, postcode=None, city=None):
     # *not* a Python error!
     (rate,
      country,
-     exception) = vat_moss.billing_address.calculate_rate(to_unicode(country),
-                                                          to_unicode(postcode),
-                                                          to_unicode(city))
+     exception) = vat_moss.billing_address.calculate_rate(u(country),
+                                                          u(postcode),
+                                                          u(city))
     return rate
 
 
@@ -86,17 +88,11 @@ def lookup_vat_by_phone_number(phone_number=None, country=None):
     # *not* a Python error!
     (rate,
      country,
-     exception) = vat_moss.phone_number.calculate_rate(to_unicode(phone_number),
-                                                       to_unicode(country))
+     exception) = vat_moss.phone_number.calculate_rate(u(phone_number),
+                                                       u(country))
     return rate
 
 
 def calculate_tax(price, rate):
     tax = price * rate
     return tax.quantize(D('0.01'))
-
-
-def to_unicode(s):
-    # vat_moss wants all strings in Unicode, or None if a string isn't
-    # included in the submission
-    return None if s is None else unicode(s)
