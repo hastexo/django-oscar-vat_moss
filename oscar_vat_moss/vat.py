@@ -24,12 +24,13 @@ def apply_to(submission):
 
 
 def lookup_vat(submission):
-    # Use dict.get here so we default to None for non-existing fields
-    city = submission.get('line4')
-    country = submission.get('country')
-    postcode = submission.get('postcode')
-    phone_number = submission.get('phone_number')
-    vatin = submission.get('vatin')
+    shipping_address = submission['shipping_address']
+    # Use getattr here so we can default to None for non-existing fields
+    city = getattr(shipping_address, 'line4', None)
+    country = getattr(shipping_address, 'country', None)
+    postcode = getattr(shipping_address, 'postcode', None)
+    phone_number = getattr(shipping_address, 'phone_number', None)
+    vatin = getattr(shipping_address, 'vatin', None)
 
     verifications = 0
     address_vat_rate = None
@@ -50,7 +51,7 @@ def lookup_vat(submission):
 
     try:
         if city and country:
-            address_vat_rate = lookup_vat_by_address(country,
+            address_vat_rate = lookup_vat_by_address(country.code,
                                                      postcode,
                                                      city)
             verifications += 1
@@ -61,7 +62,7 @@ def lookup_vat(submission):
     try:
         if phone_number:
             phone_vat_rate = lookup_vat_by_phone_number(phone_number,
-                                                        country)
+                                                        country.code)
             verifications += 1
     except:
         pass
@@ -72,24 +73,24 @@ def lookup_vat(submission):
     return address_vat_rate or phone_vat_rate
 
 
-def lookup_vat_by_address(country=None, postcode=None, city=None):
+def lookup_vat_by_address(country_code=None, postcode=None, city=None):
     # exception is a statutory VAT exception,
     # *not* a Python error!
     (rate,
      country,
-     exception) = vat_moss.billing_address.calculate_rate(u(country),
+     exception) = vat_moss.billing_address.calculate_rate(u(country_code),
                                                           u(postcode),
                                                           u(city))
     return rate
 
 
-def lookup_vat_by_phone_number(phone_number=None, country=None):
+def lookup_vat_by_phone_number(phone_number=None, country_code=None):
     # exception is a statutory VAT exception,
     # *not* a Python error!
     (rate,
      country,
      exception) = vat_moss.phone_number.calculate_rate(u(phone_number),
-                                                       u(country))
+                                                       u(country_code))
     return rate
 
 
