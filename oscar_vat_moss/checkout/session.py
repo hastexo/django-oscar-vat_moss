@@ -16,15 +16,12 @@ class CheckoutSessionMixin(session.CheckoutSessionMixin):
         if assess_tax:
             try:
                 vat.apply_to(submission)
-            except vat.VATAssessmentException as e:
-                raise exceptions.FailedPreCondition(
-                    url=reverse('checkout:shipping-address'),
-                    message=_(str(e))
-                )
-
-            # Recalculate order total to ensure we have a tax-inclusive total
-            submission['order_total'] = self.get_order_totals(
-                submission['basket'], submission['shipping_charge'])
+                # Recalculate order total to ensure we have a
+                # tax-inclusive total
+                submission['order_total'] = self.get_order_totals(
+                    submission['basket'], submission['shipping_charge'])
+            except vat.VATAssessmentException:
+                pass
         return submission
 
     def check_a_valid_shipping_address_is_captured(self):
