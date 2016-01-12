@@ -34,6 +34,14 @@ def lookup_vat_for_submission(submission):
     return lookup_vat_for_address(shipping_address)
 
 
+def lookup_vat_for_user(user):
+    # If we have an address that is marked as the default
+    # shipping address, we'll use that. Otherwise,
+    # randomly use the first address.
+    tax_address = self.user.addresses.order_by('-is_default_for_shipping')[0]
+    return lookup_vat_for_address(tax_address)
+
+
 def lookup_vat_for_address(address):
     # Use getattr here so we can default to empty string for
     # non-existing fields.
