@@ -13,7 +13,7 @@ VERIFICATIONS_NEEDED = 2
 
 
 def apply_to(submission):
-    rate = lookup_vat(submission)
+    rate = lookup_vat_for_submission(submission)
 
     for line in submission['basket'].all_lines():
         line_tax = calculate_tax(
@@ -28,23 +28,32 @@ def apply_to(submission):
         shipping_charge.excl_tax, rate)
 
 
-def lookup_vat(submission):
+def lookup_vat_for_submission(submission):
     shipping_address = submission['shipping_address']
     # Use getattr here so we can default to empty string for
     # non-existing fields.
     city = getattr(shipping_address, 'line4', '')
+    company = getattr(shipping_address, 'line1', '')
     country = getattr(shipping_address, 'country', '')
     postcode = getattr(shipping_address, 'postcode', '')
     phone_number = getattr(shipping_address, 'phone_number', '')
     vatin = getattr(shipping_address, 'vatin', '')
 
+    return lookup_vat(city,
+                      company,
+                      country,
+                      postcode,
+                      phone_number,
+                      vatin)
+
+
+def lookup_vat(city, company, country, postcode, phone_number, vatin):
     verifications = 0
     address_vat_rate = None
     phone_vat_rate = None
 
     if vatin:
-        shipping_company = getattr(shipping_address, 'line1', '')
-        rate = lookup_vat_by_vatin(vatin, shipping_company)
+        rate = lookup_vat_by_vatin(vatin, company)
         # TODO: Test if we have our own VATIN, and do apply VAT if
         # shipping country is the same as the store's own country.
         return rate
