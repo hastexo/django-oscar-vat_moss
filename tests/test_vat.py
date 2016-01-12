@@ -206,3 +206,59 @@ class SubmissionTest(unittest.TestCase):
         address.phone_number = '+49 9 999 9999'
         with self.assertRaises(vat.VATAssessmentException):
             result_rate = vat.lookup_vat_for_submission(submission)
+
+
+class ApplyTest(unittest.TestCase):
+
+    def testBasketWithTax(self):
+        basket = Mock()
+        line = Mock()
+        line.line_price_excl_tax_incl_discounts = D('100.00')
+        line.purchase_info = Mock()
+        line.purchase_info.price = Mock()
+        line.quantity = 1
+        basket.all_lines = Mock(return_value=[line])
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.vatin = ''
+        shipping_charge = Mock()
+        shipping_charge.excl_tax = D('10.00')
+
+        submission = { 'basket': basket,
+                       'shipping_address': address,
+                       'shipping_charge': shipping_charge }
+
+        vat.apply_to(submission)
+        self.assertEqual(shipping_charge.tax, D('2.00'))
+        self.assertEqual(line.purchase_info.price.tax, D('20.00'))
+
+    def testBasketWithVATIN(self):
+        basket = Mock()
+        line = Mock()
+        line.line_price_excl_tax_incl_discounts = D('100.00')
+        line.purchase_info = Mock()
+        line.purchase_info.price = Mock()
+        line.quantity = 1
+        basket.all_lines = Mock(return_value=[line])
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = 'ATU66688202'
+        shipping_charge = Mock()
+        shipping_charge.excl_tax = D('10.00')
+
+        submission = { 'basket': basket,
+                       'shipping_address': address,
+                       'shipping_charge': shipping_charge }
+
+        vat.apply_to(submission)
+        self.assertEqual(shipping_charge.tax, D('0.00'))
+        self.assertEqual(line.purchase_info.price.tax, D('0.00'))
