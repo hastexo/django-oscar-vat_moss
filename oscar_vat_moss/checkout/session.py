@@ -13,7 +13,7 @@ class CheckoutSessionMixin(session.CheckoutSessionMixin):
         if submission['shipping_address'] and submission['shipping_method']:
             try:
                 vat.apply_to(submission)
-            except vat.NonMatchingVATINException as e:
+            except vat.VATAssessmentException as e:
                 raise exceptions.FailedPreCondition(
                     url=reverse('checkout:shipping-address'),
                     message=_(str(e))

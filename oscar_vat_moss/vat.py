@@ -9,6 +9,8 @@ import vat_moss.phone_number
 
 from oscar_vat_moss.util import u
 
+VERIFICATIONS_NEEDED = 2
+
 
 def apply_to(submission):
     rate = lookup_vat(submission)
@@ -65,10 +67,13 @@ def lookup_vat(submission):
     except:
         pass
 
-    # TODO: Raise an error if we don't have 2 verifications
+    if verifications < VERIFICATIONS_NEEDED:
+        raise VATAssessmentException()
 
-    # TODO: Verify here that the calculated rates actually match
-    return address_vat_rate or phone_vat_rate
+    if address_vat_rate != phone_vat_rate:
+        raise VATAssessmentException()
+
+    return address_vat_rate
 
 
 def lookup_vat_by_vatin(vatin, company_name):
@@ -117,7 +122,11 @@ def calculate_tax(price, rate):
     return tax.quantize(D('0.01'))
 
 
-class NonMatchingVATINException(Exception):
+class VATAssessmentException(Exception):
+    pass
+
+
+class NonMatchingVATINException(VATAssessmentException):
 
     def __init__(self, vatin, company_name):
         self.message = _('VATIN %s does not match company name %s' %
