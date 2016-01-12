@@ -38,7 +38,7 @@ def lookup_vat_for_user(user):
     # If we have an address that is marked as the default
     # shipping address, we'll use that. Otherwise,
     # randomly use the first address.
-    tax_address = self.user.addresses.order_by('-is_default_for_shipping')[0]
+    tax_address = user.addresses.order_by('-is_default_for_shipping')[0]
     return lookup_vat_for_address(tax_address)
 
 

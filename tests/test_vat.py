@@ -145,6 +145,51 @@ class PhoneNumberAddressTest(unittest.TestCase):
                                              num,
                                              None)
 
+class UserTest(unittest.TestCase):
+
+    def test_valid_user(self):
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = ''
+        user = Mock()
+        user.addresses = Mock()
+        user.addresses.order_by = Mock(return_value=[address])
+
+        result_rate = vat.lookup_vat_for_user(user)
+        self.assertEqual(result_rate,
+                         D('0.20'))
+
+        address.vatin = 'ATU66688202'
+        result_rate = vat.lookup_vat_for_user(user)
+        self.assertEqual(result_rate,
+                         D('0.00'))
+
+    def test_invalid_user(self):
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+49 911 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = ''
+        user = Mock()
+        user.addresses = Mock()
+        user.addresses.order_by = Mock(return_value=[address])
+
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_user(user)
+
+        address.vatin = 'ATU66688999'
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_user(user)
+
+
 class SubmissionTest(unittest.TestCase):
 
     def test_valid_submission(self):
