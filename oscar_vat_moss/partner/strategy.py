@@ -8,7 +8,12 @@ from decimal import Decimal as D
 import logging
 
 
-class Selector(object):
+class DeferredVATSelector(object):
+    """Selector that returns the DeferredVATStrategy.
+
+    To use this selector directly:
+    from oscar_vat_moss.apps.partner import DeferredVATSelector as Selector"""
+
     def strategy(self, request=None, user=None, **kwargs):
         return DeferredVATStrategy(request)
 
