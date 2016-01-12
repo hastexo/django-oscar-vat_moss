@@ -1,6 +1,5 @@
 import unittest
 from decimal import Decimal as D
-from oscar.test import factories
 from oscar_vat_moss import vat
 
 class AddressTest(unittest.TestCase):
@@ -48,3 +47,26 @@ class PhoneNumberTest(unittest.TestCase):
             self.assertEqual(result_rate,
                              expected_rate,
                              msg="Unexpected VAT rate returned for %s: %s" % (num, result_rate))
+
+class VATINTest(unittest.TestCase):
+    VALID_VATINS = (
+        # VATIN         # Company name
+        ('ATU66688202', 'hastexo Professional Services GmbH'),
+        ('ATU66688202', 'HASTEXO PROFESSIONAL SERVICES GMBH'),
+        ('ATU66688202', 'hastexo Professional Services GmbH (Procurement Department)'),
+        )
+    INVALID_VATINS = (
+        # VATIN         # Incorrect company name
+        ('ATU66688202', 'Example, Inc.'),
+        ('ATU66688202', 'hastexo'),
+        )
+
+    def test_matching_vatin(self):
+        for vatin, name in self.VALID_VATINS:
+            result_rate = vat.lookup_vat_by_vatin(vatin, name)
+            self.assertEqual(result_rate, D('0.00'))
+
+    def test_non_matching_vatin(self):
+        for vatin, name in self.INVALID_VATINS:
+            with self.assertRaises(vat.NonMatchingVATINException):
+                result_rate = vat.lookup_vat_by_vatin(vatin, name)

@@ -1,4 +1,7 @@
 from decimal import Decimal as D
+import re
+
+from django.utils.translation import ugettext_lazy as _
 
 import vat_moss.billing_address
 import vat_moss.id
@@ -37,18 +40,12 @@ def lookup_vat(submission):
     address_vat_rate = None
     phone_vat_rate = None
 
-    # We already validated the VATIN through a form validator;
-    # additional errors here shouldn't happen.
     if vatin:
-        (vatin_country,
-         vatin_normalized,
-         vatin_company) = vat_moss.id.validate(u(vatin))
-
-    # TODO: check here whether or not the returned company name
-    # matches the billing address.
-
-    # TODO: Set effective tax rate to zero IFF VATIN verifies and the
-    # country doesn't match the store's own country.
+        shipping_company = getattr(shipping_address, 'line1', '')
+        rate = lookup_vat_by_vatin(vatin, shipping_company)
+        # TODO: Test if we have our own VATIN, and do apply VAT if
+        # shipping country is the same as the store's own country.
+        return rate
 
     try:
         if city and country:
@@ -72,6 +69,26 @@ def lookup_vat(submission):
 
     # TODO: Verify here that the calculated rates actually match
     return address_vat_rate or phone_vat_rate
+
+
+def lookup_vat_by_vatin(vatin, company_name):
+    # We already validated the VATIN through a form validator;
+    # additional validation errors here shouldn't happen.
+    (vatin_country,
+     vatin_normalized,
+     vatin_company) = vat_moss.id.validate(u(vatin))
+    # Does the VATIN match the company name we've been given?
+    #
+    # This is effectively a case-insensitive startswith(), but the
+    # regex should really be configurable.
+    regex = "^%s" % vatin_company
+    if not re.search(regex, company_name, re.I):
+        raise NonMatchingVATINException(vatin,
+                                        company_name)
+    # We have a verified VATIN and it matches the company
+    # name. Reverse charge applies.
+    #
+    return D('0.00')
 
 
 def lookup_vat_by_address(country_code=None, postcode=None, city=None):
@@ -98,3 +115,15 @@ def lookup_vat_by_phone_number(phone_number=None, country_code=None):
 def calculate_tax(price, rate):
     tax = price * rate
     return tax.quantize(D('0.01'))
+
+
+class NonMatchingVATINException(Exception):
+
+    def __init__(self, vatin, company_name):
+        self.message = _('VATIN %s does not match company name %s' %
+                         (vatin, company_name))
+        self.vatin = vatin
+        self.company_name = company_name
+
+    def __str__(self):
+        return self.message
