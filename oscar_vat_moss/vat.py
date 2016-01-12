@@ -6,6 +6,9 @@ from django.utils.translation import ugettext_lazy as _
 import vat_moss.billing_address
 import vat_moss.id
 import vat_moss.phone_number
+from vat_moss.errors import URLError
+from vat_moss.errors import InvalidError, UndefinitiveError
+from vat_moss.errors import WebServiceError, WebServiceUnavailableError
 
 from oscar_vat_moss.util import u
 
@@ -32,55 +35,68 @@ def lookup_vat_for_submission(submission):
     shipping_address = submission['shipping_address']
     # Use getattr here so we can default to empty string for
     # non-existing fields.
-    city = getattr(shipping_address, 'line4', '')
     company = getattr(shipping_address, 'line1', '')
+    city = getattr(shipping_address, 'line4', '')
     country = getattr(shipping_address, 'country', '')
     postcode = getattr(shipping_address, 'postcode', '')
     phone_number = getattr(shipping_address, 'phone_number', '')
     vatin = getattr(shipping_address, 'vatin', '')
 
-    return lookup_vat(city,
-                      company,
-                      country,
-                      postcode,
-                      phone_number,
-                      vatin)
+    try:
+        return lookup_vat(city,
+                          company,
+                          country.code,
+                          postcode,
+                          phone_number,
+                          vatin)
+    except (URLError, WebServiceError, WebServiceUnavailableError):
+        message = "_(Temporary error in VAT assessment. Please try again.)"
+        raise VATAssessmentUnavailableException(message)
 
 
-def lookup_vat(city, company, country, postcode, phone_number, vatin):
+def lookup_vat(company, city, country_code, postcode, phone_number, vatin):
     verifications = 0
     address_vat_rate = None
     phone_vat_rate = None
 
     if vatin:
-        rate = lookup_vat_by_vatin(vatin, company)
-        # TODO: Test if we have our own VATIN, and do apply VAT if
-        # shipping country is the same as the store's own country.
-        return rate
+        try:
+            rate = lookup_vat_by_vatin(vatin, company)
+            # TODO: Test if we have our own VATIN, and do apply VAT if
+            # shipping country is the same as the store's own country.
+            return rate
+        except InvalidError:
+            message = _("Invalid VAT Identification Number (VATIN). "
+                        "Please try again.")
+            raise VATAssessmentException(message)
 
-    try:
-        if city and country:
-            address_vat_rate = lookup_vat_by_address(country.code,
+    if city and country_code:
+        try:
+            address_vat_rate = lookup_vat_by_address(country_code,
                                                      postcode,
                                                      city)
             verifications += 1
-    except:
-        # We'll try the next one
-        pass
+        except UndefinitiveError:
+            # We'll try the next one
+            pass
 
-    try:
-        if phone_number:
+    if phone_number:
+        try:
             phone_vat_rate = lookup_vat_by_phone_number(phone_number,
-                                                        country.code)
+                                                        country_code)
             verifications += 1
-    except:
-        pass
+        except UndefinitiveError:
+            pass
 
     if verifications < VERIFICATIONS_NEEDED:
-        raise VATAssessmentException()
+        message = _("Insufficent information for VAT assessment. "
+                    "Please try again.")
+        raise VATAssessmentException(message)
 
     if address_vat_rate != phone_vat_rate:
-        raise VATAssessmentException()
+        message = _("Conflicting VAT rates. "
+                    "Please try again.")
+        raise VATAssessmentException(message)
 
     return address_vat_rate
 
@@ -132,6 +148,10 @@ def calculate_tax(price, rate):
 
 
 class VATAssessmentException(Exception):
+    pass
+
+
+class VATAssessmentUnavailableException(VATAssessmentException):
     pass
 
 
