@@ -18,6 +18,16 @@ class DeferredVATSelector(object):
         return DeferredVATStrategy(request)
 
 
+class PerUserVATSelector(object):
+    """Selector that returns the PerUserVATStrategy.
+
+    To use this selector directly:
+    from oscar_vat_moss.apps.partner import PerUserVATSelector as Selector"""
+
+    def strategy(self, request=None, user=None, **kwargs):
+        return PerUserVATStrategy(request)
+
+
 class DeferredVATStrategy(strategy.UseFirstStockRecord, strategy.DeferredTax,
                           strategy.StockRequired, strategy.Structured):
     """Strategy that defers tax assessment until checkout.
