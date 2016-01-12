@@ -25,12 +25,13 @@ def apply_to(submission):
 
 def lookup_vat(submission):
     shipping_address = submission['shipping_address']
-    # Use getattr here so we can default to None for non-existing fields
-    city = getattr(shipping_address, 'line4', None)
-    country = getattr(shipping_address, 'country', None)
-    postcode = getattr(shipping_address, 'postcode', None)
-    phone_number = getattr(shipping_address, 'phone_number', None)
-    vatin = getattr(shipping_address, 'vatin', None)
+    # Use getattr here so we can default to empty string for
+    # non-existing fields.
+    city = getattr(shipping_address, 'line4', '')
+    country = getattr(shipping_address, 'country', '')
+    postcode = getattr(shipping_address, 'postcode', '')
+    phone_number = getattr(shipping_address, 'phone_number', '')
+    vatin = getattr(shipping_address, 'vatin', '')
 
     verifications = 0
     address_vat_rate = None
