@@ -10,9 +10,9 @@ class CheckoutSessionMixin(session.CheckoutSessionMixin):
         submission = super(CheckoutSessionMixin, self).build_submission(
             **kwargs)
 
-        assess_tax = (submission['shipping_method']
-                      and submission['shipping_address']
-                      and submission['shipping_address'].phone_number)
+        assess_tax = (submission['shipping_method'] and
+                      submission['shipping_address'] and
+                      submission['shipping_address'].phone_number)
         if assess_tax:
             try:
                 vat.apply_to(submission)
