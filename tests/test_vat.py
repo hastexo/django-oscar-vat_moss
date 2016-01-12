@@ -70,3 +70,75 @@ class VATINTest(unittest.TestCase):
         for vatin, name in self.INVALID_VATINS:
             with self.assertRaises(vat.NonMatchingVATINException):
                 result_rate = vat.lookup_vat_by_vatin(vatin, name)
+
+
+class PhoneNumberAddressTest(unittest.TestCase):
+    VALID_COMBINATIONS = (
+        # Austria, regular rate
+        ({ 'line4': 'Vienna',
+           'country': 'AT',
+           'postcode': 1010 },
+         "+43 123 456 789",
+         D('0.20')),
+        # Germany, regular rate
+        ({ 'line4': 'Berlin',
+           'country': 'DE',
+           'postcode': 10001 },
+         "+49 123 456 789",
+         D('0.19')),
+        # Austria, VAT exception (phone area code matches postcode)
+        ({'line4': 'Jungholz',
+          'country': 'AT',
+          'postcode': 6691},
+         "+43 5676 123",
+         D('0.19')),
+
+    )
+
+    INVALID_COMBINATIONS = (
+        # Austrian location, German calling code
+        ({ 'line4': 'Vienna',
+           'country': 'AT',
+           'postcode': 1010 },
+         "+49 123 456 789"),
+        # German location, Austrian calling code
+        ({ 'line4': 'Berlin',
+           'country': 'DE',
+           'postcode': 10001 },
+         "+43 123 456 789"),
+        # Austrian location, non-matching area code
+        ({'line4': 'Jungholz',
+          'country': 'AT',
+          'postcode': 6691},
+         "+43 1 123 4567"),
+    )
+
+    def test_valid_combination(self):
+        for addr, num, expected_rate in self.VALID_COMBINATIONS:
+            country_code = addr.get('country')
+            postcode = addr.get('postcode')
+            city = addr.get('line4')
+
+            result_rate = vat.lookup_vat(None,
+                                         city,
+                                         country_code,
+                                         postcode,
+                                         num,
+                                         None)
+            self.assertEqual(result_rate,
+                             expected_rate)
+        pass
+
+    def test_invalid_combination(self):
+        for addr, num in self.INVALID_COMBINATIONS:
+            country_code = addr.get('country')
+            postcode = addr.get('postcode')
+            city = addr.get('line4')
+
+            with self.assertRaises(vat.VATAssessmentException):
+                result_rate = vat.lookup_vat(None,
+                                             city,
+                                             country_code,
+                                             postcode,
+                                             num,
+                                             None)
