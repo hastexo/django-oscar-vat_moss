@@ -1,8 +1,6 @@
 from decimal import Decimal as D
 import re
 
-from django.utils.translation import ugettext_lazy as _
-
 import vat_moss.billing_address
 import vat_moss.id
 import vat_moss.phone_number
@@ -27,30 +25,34 @@ def apply_to(submission):
     # Note, we change the submission in place - we don't need to
     # return anything from this function
     shipping_charge = submission['shipping_charge']
-    shipping_charge.tax = calculate_tax(
-        shipping_charge.excl_tax, rate)
+    shipping_charge.tax = calculate_tax(shipping_charge.excl_tax,
+                                        rate)
 
 
 def lookup_vat_for_submission(submission):
     shipping_address = submission['shipping_address']
+    return lookup_vat_for_address(shipping_address)
+
+
+def lookup_vat_for_address(address):
     # Use getattr here so we can default to empty string for
     # non-existing fields.
-    company = getattr(shipping_address, 'line1', '')
-    city = getattr(shipping_address, 'line4', '')
-    country = getattr(shipping_address, 'country', '')
-    postcode = getattr(shipping_address, 'postcode', '')
-    phone_number = getattr(shipping_address, 'phone_number', '')
-    vatin = getattr(shipping_address, 'vatin', '')
+    company = getattr(address, 'line1', '')
+    city = getattr(address, 'line4', '')
+    country = getattr(address, 'country', '')
+    postcode = getattr(address, 'postcode', '')
+    phone_number = getattr(address, 'phone_number', '')
+    vatin = getattr(address, 'vatin', '')
 
     try:
-        return lookup_vat(city,
-                          company,
+        return lookup_vat(company,
+                          city,
                           country.code,
                           postcode,
                           phone_number,
                           vatin)
     except (URLError, WebServiceError, WebServiceUnavailableError):
-        message = "_(Temporary error in VAT assessment. Please try again.)"
+        message = "Temporary error in VAT assessment"
         raise VATAssessmentUnavailableException(message)
 
 
@@ -66,15 +68,14 @@ def lookup_vat(company, city, country_code, postcode, phone_number, vatin):
             # shipping country is the same as the store's own country.
             return rate
         except InvalidError:
-            message = _("Invalid VAT Identification Number (VATIN). "
-                        "Please try again.")
+            message = "Invalid VAT Identification Number (VATIN)"
             raise VATAssessmentException(message)
 
     if city and country_code:
         try:
-            address_vat_rate = lookup_vat_by_address(country_code,
-                                                     postcode,
-                                                     city)
+            address_vat_rate = lookup_vat_by_city(country_code,
+                                                  postcode,
+                                                  city)
             verifications += 1
         except UndefinitiveError:
             # We'll try the next one
@@ -89,13 +90,12 @@ def lookup_vat(company, city, country_code, postcode, phone_number, vatin):
             pass
 
     if verifications < VERIFICATIONS_NEEDED:
-        message = _("Insufficent information for VAT assessment. "
-                    "Please try again.")
+        message = "Insufficent information for VAT assessment"
         raise VATAssessmentException(message)
 
     if address_vat_rate != phone_vat_rate:
-        message = _("Conflicting VAT rates. "
-                    "Please try again.")
+        message = "Unable to work out applicable VAT rate " \
+                  "based on address and phone information"
         raise VATAssessmentException(message)
 
     return address_vat_rate
@@ -121,7 +121,7 @@ def lookup_vat_by_vatin(vatin, company_name):
     return D('0.00')
 
 
-def lookup_vat_by_address(country_code=None, postcode=None, city=None):
+def lookup_vat_by_city(country_code=None, postcode=None, city=None):
     # exception is a statutory VAT exception,
     # *not* a Python error!
     (rate,
@@ -148,11 +148,7 @@ def calculate_tax(price, rate):
 
 
 class VATAssessmentException(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return repr(self.message)
+    pass
 
 
 class VATAssessmentUnavailableException(VATAssessmentException):
@@ -162,7 +158,7 @@ class VATAssessmentUnavailableException(VATAssessmentException):
 class NonMatchingVATINException(VATAssessmentException):
 
     def __init__(self, vatin, company_name):
-        self.message = _('VATIN %s does not match company name %s' %
-                         (vatin, company_name))
+        self.message = 'VATIN %s does not match company name %s' % \
+                       (vatin, company_name)
         self.vatin = vatin
         self.company_name = company_name
