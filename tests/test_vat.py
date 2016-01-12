@@ -2,6 +2,8 @@ import unittest
 from decimal import Decimal as D
 from oscar_vat_moss import vat
 
+from mock import Mock
+
 class AddressTest(unittest.TestCase):
     ADDRESSES = (
         # Shipping address attributes  # Expected rate
@@ -19,12 +21,12 @@ class AddressTest(unittest.TestCase):
          },                            D('0.23')),
     )
 
-    def test_lookup_vat_by_address(self):
+    def test_lookup_vat_by_city(self):
         for addr, expected_rate in self.ADDRESSES:
             country_code = addr.get('country')
             postcode = addr.get('postcode')
             city = addr.get('line4')
-            result_rate = vat.lookup_vat_by_address(country_code, postcode, city)
+            result_rate = vat.lookup_vat_by_city(country_code, postcode, city)
             self.assertEqual(result_rate,
                              expected_rate,
                              msg="Unexpected VAT rate returned for %s: %s" % (addr, result_rate))
@@ -70,3 +72,193 @@ class VATINTest(unittest.TestCase):
         for vatin, name in self.INVALID_VATINS:
             with self.assertRaises(vat.NonMatchingVATINException):
                 result_rate = vat.lookup_vat_by_vatin(vatin, name)
+
+
+class PhoneNumberAddressTest(unittest.TestCase):
+    VALID_COMBINATIONS = (
+        # Austria, regular rate
+        ({ 'line4': 'Vienna',
+           'country': 'AT',
+           'postcode': 1010 },
+         "+43 123 456 789",
+         D('0.20')),
+        # Germany, regular rate
+        ({ 'line4': 'Berlin',
+           'country': 'DE',
+           'postcode': 10001 },
+         "+49 123 456 789",
+         D('0.19')),
+        # Austria, VAT exception (phone area code matches postcode)
+        ({'line4': 'Jungholz',
+          'country': 'AT',
+          'postcode': 6691},
+         "+43 5676 123",
+         D('0.19')),
+
+    )
+
+    INVALID_COMBINATIONS = (
+        # Austrian location, German calling code
+        ({ 'line4': 'Vienna',
+           'country': 'AT',
+           'postcode': 1010 },
+         "+49 123 456 789"),
+        # German location, Austrian calling code
+        ({ 'line4': 'Berlin',
+           'country': 'DE',
+           'postcode': 10001 },
+         "+43 123 456 789"),
+        # Austrian location, non-matching area code
+        ({'line4': 'Jungholz',
+          'country': 'AT',
+          'postcode': 6691},
+         "+43 1 123 4567"),
+    )
+
+    def test_valid_combination(self):
+        for addr, num, expected_rate in self.VALID_COMBINATIONS:
+            country_code = addr.get('country')
+            postcode = addr.get('postcode')
+            city = addr.get('line4')
+
+            result_rate = vat.lookup_vat(None,
+                                         city,
+                                         country_code,
+                                         postcode,
+                                         num,
+                                         None)
+            self.assertEqual(result_rate,
+                             expected_rate)
+        pass
+
+    def test_invalid_combination(self):
+        for addr, num in self.INVALID_COMBINATIONS:
+            country_code = addr.get('country')
+            postcode = addr.get('postcode')
+            city = addr.get('line4')
+
+            with self.assertRaises(vat.VATAssessmentException):
+                result_rate = vat.lookup_vat(None,
+                                             city,
+                                             country_code,
+                                             postcode,
+                                             num,
+                                             None)
+
+class SubmissionTest(unittest.TestCase):
+
+    def test_valid_submission(self):
+        basket = Mock()
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = ''
+
+        submission = { 'basket': basket,
+                       'shipping_address': address }
+
+        result_rate = vat.lookup_vat_for_submission(submission)
+        self.assertEqual(result_rate,
+                         D('0.20'))
+
+        address.vatin = 'ATU66688202'
+        result_rate = vat.lookup_vat_for_submission(submission)
+        self.assertEqual(result_rate,
+                         D('0.00'))
+
+        address.vatin = ''
+        address.line1 = 'HASTEXO PROFESSIONAL SERVICES GMBH'
+        result_rate = vat.lookup_vat_for_submission(submission)
+        self.assertEqual(result_rate,
+                         D('0.20'))
+
+
+    def test_invalid_submission(self):
+        basket = Mock()
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = 'ATU66688999'
+
+        submission = { 'basket': basket,
+                       'shipping_address': address }
+
+        expected_rate = D('0.20')
+
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_submission(submission)
+
+        address.vatin = 'ATU66688202'
+        address.line1 = 'hastexo'
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_submission(submission)
+
+        address.vatin = ''
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.phone_number = '+49 9 999 9999'
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_submission(submission)
+
+
+class ApplyTest(unittest.TestCase):
+
+    def testBasketWithTax(self):
+        basket = Mock()
+        line = Mock()
+        line.line_price_excl_tax_incl_discounts = D('100.00')
+        line.purchase_info = Mock()
+        line.purchase_info.price = Mock()
+        line.quantity = 1
+        basket.all_lines = Mock(return_value=[line])
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.vatin = ''
+        shipping_charge = Mock()
+        shipping_charge.excl_tax = D('10.00')
+
+        submission = { 'basket': basket,
+                       'shipping_address': address,
+                       'shipping_charge': shipping_charge }
+
+        vat.apply_to(submission)
+        self.assertEqual(shipping_charge.tax, D('2.00'))
+        self.assertEqual(line.purchase_info.price.tax, D('20.00'))
+
+    def testBasketWithVATIN(self):
+        basket = Mock()
+        line = Mock()
+        line.line_price_excl_tax_incl_discounts = D('100.00')
+        line.purchase_info = Mock()
+        line.purchase_info.price = Mock()
+        line.quantity = 1
+        basket.all_lines = Mock(return_value=[line])
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = 'ATU66688202'
+        shipping_charge = Mock()
+        shipping_charge.excl_tax = D('10.00')
+
+        submission = { 'basket': basket,
+                       'shipping_address': address,
+                       'shipping_charge': shipping_charge }
+
+        vat.apply_to(submission)
+        self.assertEqual(shipping_charge.tax, D('0.00'))
+        self.assertEqual(line.purchase_info.price.tax, D('0.00'))
