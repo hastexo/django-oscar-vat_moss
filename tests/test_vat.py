@@ -19,12 +19,12 @@ class AddressTest(unittest.TestCase):
          },                            D('0.23')),
     )
 
-    def test_lookup_vat_by_address(self):
+    def test_lookup_vat_by_city(self):
         for addr, expected_rate in self.ADDRESSES:
             country_code = addr.get('country')
             postcode = addr.get('postcode')
             city = addr.get('line4')
-            result_rate = vat.lookup_vat_by_address(country_code, postcode, city)
+            result_rate = vat.lookup_vat_by_city(country_code, postcode, city)
             self.assertEqual(result_rate,
                              expected_rate,
                              msg="Unexpected VAT rate returned for %s: %s" % (addr, result_rate))
