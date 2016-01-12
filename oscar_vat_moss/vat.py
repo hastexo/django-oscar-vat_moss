@@ -148,7 +148,11 @@ def calculate_tax(price, rate):
 
 
 class VATAssessmentException(Exception):
-    pass
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return repr(self.message)
 
 
 class VATAssessmentUnavailableException(VATAssessmentException):
@@ -162,6 +166,3 @@ class NonMatchingVATINException(VATAssessmentException):
                          (vatin, company_name))
         self.vatin = vatin
         self.company_name = company_name
-
-    def __str__(self):
-        return self.message
