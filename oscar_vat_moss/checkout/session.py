@@ -27,6 +27,19 @@ class CheckoutSessionMixin(session.CheckoutSessionMixin):
                 submission['basket'], submission['shipping_charge'])
         return submission
 
+    def check_a_valid_shipping_address_is_captured(self):
+        super(CheckoutSessionMixin, self)
+        shipping_address = self.get_shipping_address(
+            basket=self.request.basket)
+        try:
+            vat.lookup_vat_for_shipping_address(shipping_address)
+        except vat.VATAssessmentException as e:
+            message = _("%s. Please try again." % str(e))
+            raise exceptions.FailedPreCondition(
+                url=reverse('checkout:shipping-address'),
+                message=message
+            )
+
     def get_context_data(self, **kwargs):
         ctx = super(CheckoutSessionMixin, self).get_context_data(**kwargs)
 
