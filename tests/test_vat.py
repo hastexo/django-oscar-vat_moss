@@ -2,6 +2,8 @@ import unittest
 from decimal import Decimal as D
 from oscar_vat_moss import vat
 
+from mock import Mock
+
 class AddressTest(unittest.TestCase):
     ADDRESSES = (
         # Shipping address attributes  # Expected rate
@@ -142,3 +144,65 @@ class PhoneNumberAddressTest(unittest.TestCase):
                                              postcode,
                                              num,
                                              None)
+
+class SubmissionTest(unittest.TestCase):
+
+    def test_valid_submission(self):
+        basket = Mock()
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = ''
+
+        submission = { 'basket': basket,
+                       'shipping_address': address }
+
+        result_rate = vat.lookup_vat_for_submission(submission)
+        self.assertEqual(result_rate,
+                         D('0.20'))
+
+        address.vatin = 'ATU66688202'
+        result_rate = vat.lookup_vat_for_submission(submission)
+        self.assertEqual(result_rate,
+                         D('0.00'))
+
+        address.vatin = ''
+        address.line1 = 'HASTEXO PROFESSIONAL SERVICES GMBH'
+        result_rate = vat.lookup_vat_for_submission(submission)
+        self.assertEqual(result_rate,
+                         D('0.20'))
+
+
+    def test_invalid_submission(self):
+        basket = Mock()
+        address = Mock()
+        address.country = Mock()
+        address.country.code = 'AT'
+        address.line4 = 'Vienna'
+        address.postcode = '1010'
+        address.phone_number = '+43 1 234 5678'
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.vatin = 'ATU66688999'
+
+        submission = { 'basket': basket,
+                       'shipping_address': address }
+
+        expected_rate = D('0.20')
+
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_submission(submission)
+
+        address.vatin = 'ATU66688202'
+        address.line1 = 'hastexo'
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_submission(submission)
+
+        address.vatin = ''
+        address.line1 = 'hastexo Professional Services GmbH'
+        address.phone_number = '+49 9 999 9999'
+        with self.assertRaises(vat.VATAssessmentException):
+            result_rate = vat.lookup_vat_for_submission(submission)
