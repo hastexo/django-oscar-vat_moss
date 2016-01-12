@@ -4,11 +4,28 @@ from oscar.apps.checkout import session, exceptions
 from oscar_vat_moss import vat
 
 
-class CheckoutSessionMixin(session.CheckoutSessionMixin):
+class SeparateVATCheckoutSessionMixin(session.CheckoutSessionMixin):
+
+    def get_context_data(self, **kwargs):
+        ctx = super(SeparateVATCheckoutSessionMixin,
+                    self).get_context_data(**kwargs)
+
+        # Oscar's checkout templates look for this variable which specifies to
+        # break out the tax totals into a separate subtotal.
+        ctx['show_tax_separately'] = True
+
+        return ctx
+
+
+class FixedRateVATCheckoutSessionMixin(SeparateVATCheckoutSessionMixin):
+    pass
+
+
+class DeferredVATCheckoutSessionMixin(SeparateVATCheckoutSessionMixin):
 
     def build_submission(self, **kwargs):
-        submission = super(CheckoutSessionMixin, self).build_submission(
-            **kwargs)
+        submission = super(DeferredVATCheckoutSessionMixin,
+                           self).build_submission(**kwargs)
 
         assess_tax = (submission['shipping_method'] and
                       submission['shipping_address'] and
@@ -25,7 +42,7 @@ class CheckoutSessionMixin(session.CheckoutSessionMixin):
         return submission
 
     def check_a_valid_shipping_address_is_captured(self):
-        super(CheckoutSessionMixin, self)
+        super(DeferredVATCheckoutSessionMixin, self)
         shipping_address = self.get_shipping_address(
             basket=self.request.basket)
         try:
@@ -36,12 +53,3 @@ class CheckoutSessionMixin(session.CheckoutSessionMixin):
                 url=reverse('checkout:shipping-address'),
                 message=message
             )
-
-    def get_context_data(self, **kwargs):
-        ctx = super(CheckoutSessionMixin, self).get_context_data(**kwargs)
-
-        # Oscar's checkout templates look for this variable which specifies to
-        # break out the tax totals into a separate subtotal.
-        ctx['show_tax_separately'] = True
-
-        return ctx
