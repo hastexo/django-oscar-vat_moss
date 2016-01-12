@@ -1,4 +1,6 @@
-from oscar.apps.checkout import session
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
+from oscar.apps.checkout import session, exceptions
 from oscar_vat_moss import vat
 
 
@@ -9,7 +11,14 @@ class CheckoutSessionMixin(session.CheckoutSessionMixin):
             **kwargs)
 
         if submission['shipping_address'] and submission['shipping_method']:
-            vat.apply_to(submission)
+            try:
+                vat.apply_to(submission)
+            except vat.NonMatchingVATINException as e:
+                raise exceptions.FailedPreCondition(
+                    url=reverse('checkout:shipping-address'),
+                    message=_(str(e))
+                )
+
             # Recalculate order total to ensure we have a tax-inclusive total
             submission['order_total'] = self.get_order_totals(
                 submission['basket'], submission['shipping_charge'])
