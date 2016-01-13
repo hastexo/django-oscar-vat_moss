@@ -2,7 +2,7 @@ from django.db.models.fields import CharField
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from oscar.forms import fields
+from django.forms import fields
 import vat_moss.id
 from oscar_vat_moss.util import u
 
