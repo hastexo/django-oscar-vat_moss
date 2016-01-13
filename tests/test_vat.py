@@ -255,7 +255,7 @@ class SubmissionTest(unittest.TestCase):
 
 class ApplyTest(unittest.TestCase):
 
-    def testBasketWithTax(self):
+    def test_basket_with_tax(self):
         basket = Mock()
         line = Mock()
         line.line_price_excl_tax_incl_discounts = D('100.00')
@@ -281,7 +281,7 @@ class ApplyTest(unittest.TestCase):
         self.assertEqual(shipping_charge.tax, D('2.00'))
         self.assertEqual(line.purchase_info.price.tax, D('20.00'))
 
-    def testBasketWithVATIN(self):
+    def test_basket_with_vatin(self):
         basket = Mock()
         line = Mock()
         line.line_price_excl_tax_incl_discounts = D('100.00')
