@@ -3,9 +3,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from oscar.forms import fields
-
 import vat_moss.id
-
 from oscar_vat_moss.util import u
 
 # The longest VAT IDs are currently 2-letter country code + 15
@@ -13,19 +11,33 @@ from oscar_vat_moss.util import u
 DEFAULT_MAX_LENGTH = 32
 
 
+def vatin(verbose_name=_('VAT Identification Number (VATIN)'),
+          name='vatin',
+          verify_exists=None,
+          blank=True,
+          help_text=_('Required if you are associated with a business '
+                      'registered for VAT in the European Union.')):
+    """Convenience method to return a properly configured VATIN field."""
+    return VATINField(verbose_name=verbose_name,
+                      name=name,
+                      verify_exists=verify_exists,
+                      blank=blank,
+                      help_text=help_text)
+
+
 class VATINField(CharField):
     def __init__(self, verbose_name=None, name=None,
                  verify_exists=None, **kwargs):
         kwargs['max_length'] = kwargs.get('max_length', DEFAULT_MAX_LENGTH)
         CharField.__init__(self, verbose_name, name, **kwargs)
-        validator = VATINValidator()
+        validator = VATINValidator(None)
         self.validators.append(validator)
 
     def formfield(self, **kwargs):
         # As with CharField, this will cause VATIN validation to be performed
         # twice.
         defaults = {
-            'form_class': fields.VATINField,
+            'form_class': fields.CharField,
         }
         defaults.update(kwargs)
         return super(CharField, self).formfield(**defaults)
