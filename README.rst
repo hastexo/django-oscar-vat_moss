@@ -4,6 +4,12 @@ oscar\_vat\_moss
 Enables EU VATMOSS processing for the Oscar e-commerce system
 -------------------------------------------------------------
 
+.. image:: https://travis-ci.org/hastexo/django-oscar-vat_moss.svg?branch=master
+   :target: https://travis-ci.org/hastexo/django-oscar-vat_moss
+
+.. image:: https://codecov.io/github/hastexo/django-oscar-vat_moss/coverage.svg?branch=master
+   :target: https://codecov.io/github/hastexo/django-oscar-vat_moss?branch=master
+		    
 This package enables e-commerce application based on Django Oscar to
 assess and charge VAT (Value Added Tax) according to EU regulations.
 
