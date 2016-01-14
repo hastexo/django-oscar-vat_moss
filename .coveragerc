@@ -1,0 +1,3 @@
+[run]
+source = oscar_vat_moss
+omit = *migrations*
