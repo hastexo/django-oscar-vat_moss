@@ -29,10 +29,11 @@ class VATCheckoutSessionMixin(session.CheckoutSessionMixin):
         that here.
 
         """
+        super(VATCheckoutSessionMixin, self)
         shipping_address = self.get_shipping_address(
             basket=self.request.basket)
         try:
-            vat.lookup_vat_for_shipping_address(shipping_address)
+            vat.lookup_vat_for_address(shipping_address)
         except vat.VATAssessmentException as e:
             message = _("%s. Please try again." % str(e))
             raise exceptions.FailedPreCondition(

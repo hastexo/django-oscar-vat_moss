@@ -29,11 +29,7 @@ if not settings.configured:
     from oscar import get_core_apps, OSCAR_MAIN_TEMPLATE_DIR
 
     settings.configure(
-        DATABASES={
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-            }
-        },
+        DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:', }, },
         INSTALLED_APPS=[
             'django.contrib.auth',
             'django.contrib.admin',
@@ -42,7 +38,14 @@ if not settings.configured:
             'django.contrib.sites',
             'django.contrib.flatpages',
             'django.contrib.staticfiles',
-        ] + get_core_apps([]),
+            'compressor',
+        ] + get_core_apps([
+            'oscar_vat_moss.address',
+            'oscar_vat_moss.checkout',
+            'oscar_vat_moss.partner',
+            'oscar_vat_moss.payment',
+            'oscar_vat_moss.order',
+        ]),
         MIDDLEWARE_CLASSES=(
             'django.middleware.common.CommonMiddleware',
             'django.contrib.sessions.middleware.SessionMiddleware',
