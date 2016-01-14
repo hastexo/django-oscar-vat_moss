@@ -8,4 +8,4 @@ class PartnerAddress(AbstractPartnerAddress):
     vatin = fields.vatin()
 
 
-from oscar.apps.partner.models import * #noqa
+from oscar.apps.partner.models import *  # noqa
