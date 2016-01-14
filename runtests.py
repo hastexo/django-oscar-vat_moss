@@ -102,8 +102,6 @@ def run_tests(*test_args):
 
     if num_failures > 0:
         sys.exit(num_failures)
-    print("Generating HTML coverage report")
-    c.html_report()
 
 
 if __name__ == '__main__':
