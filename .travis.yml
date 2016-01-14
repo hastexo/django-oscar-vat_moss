@@ -8,11 +8,17 @@ python:
   - "3.3"
   - "3.4"
 
+before_install:
+  - pip install codecov
+
 install:
-    - pip install tox-travis
+  - pip install tox-travis
+
+after_success:
+  - codecov
 
 script:
-    - tox
+  - tox
 
 notifications:
   email: true
