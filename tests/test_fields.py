@@ -51,3 +51,15 @@ class VATINFieldTest(unittest.TestCase):
         self.assertEqual(field.max_length, DEFAULT_MAX_LENGTH)
         self.assertEqual(field.name,'vatin')
         self.assertTrue(field.blank)
+
+    def test_formfield(self):
+        field = vatin()
+
+        # Just ensure this doesn't fail
+        formfield = field.formfield()
+
+    def test_deconstruct(self):
+        field = vatin()
+
+        name, path, args, kwargs = field.deconstruct()
+        self.assertEqual(name, 'vatin')
