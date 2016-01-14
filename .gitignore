@@ -15,11 +15,7 @@ htmlcov
 .coveralls.yml
 
 # Database
-sandbox/db.sqlite
+oscar_vat_moss_testdb.sqlite3
 
 # Sensitive data
 TODO
-integration.py
-
-# Sandbox
-sandbox/public/media
