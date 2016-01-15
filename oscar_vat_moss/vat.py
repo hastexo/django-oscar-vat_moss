@@ -66,6 +66,17 @@ def lookup_vat_for_address(address):
         raise VATAssessmentUnavailableException(message)
 
 
+def lookup_vat_for_form_data(data):
+    company = data.get('line1')
+    city = data.get('line4')
+    country_code = data.get('country')
+    postcode = data.get('postcode')
+    phone_number = data.get('phone_number')
+    vatin = data.get('vatin')
+
+    lookup_vat(company, city, country_code, postcode, phone_number, vatin)
+
+
 def lookup_vat(company, city, country_code, postcode, phone_number, vatin):
     verifications = 0
     address_vat_rate = None
