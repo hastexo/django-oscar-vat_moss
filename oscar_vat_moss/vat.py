@@ -59,7 +59,9 @@ def lookup_vat_for_address(address):
                           postcode,
                           phone_number,
                           vatin)
-    except (URLError, WebServiceError, WebServiceUnavailableError):
+    except (URLError,
+            WebServiceError,
+            WebServiceUnavailableError):  # pragma: nocover
         message = "Temporary error in VAT assessment"
         raise VATAssessmentUnavailableException(message)
 
