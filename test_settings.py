@@ -146,3 +146,7 @@ OSCAR_INITIAL_ORDER_STATUS = 'A'
 # Testing
 NOSE_ARGS = ['-s', '--with-spec']
 OSCAR_SHOP_NAME = 'oscar_vat_moss Sandbox'
+
+VAT_MOSS_STORE_COUNTRY_CODE = 'AT'
+VAT_MOSS_STORE_CITY = 'Vienna'
+VAT_MOSS_STORE_POSTCODE = '1010'
