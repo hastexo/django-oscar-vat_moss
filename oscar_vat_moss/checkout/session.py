@@ -4,6 +4,11 @@ from oscar.apps.checkout import session, exceptions
 from oscar_vat_moss import vat
 
 
+# FixedRateVATCheckoutSessionMixin is the safer option,
+# make that the default
+CheckoutSessionMixin = FixedRateVATCheckoutSessionMixin
+
+
 class VATCheckoutSessionMixin(session.CheckoutSessionMixin):
 
     def get_context_data(self, **kwargs):

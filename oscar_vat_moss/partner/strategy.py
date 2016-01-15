@@ -72,3 +72,7 @@ class PerUserVATStrategy(strategy.UseFirstStockRecord, strategy.FixedRateTax,
             logging.warn('Unable to set default VAT rate for store, '
                          'defaulting to 0.')
             return D('0.00')
+
+
+# PerUserVATSelector is the safer option, make that the default
+Selector = PerUserVATSelector
