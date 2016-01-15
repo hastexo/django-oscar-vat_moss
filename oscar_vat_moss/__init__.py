@@ -1,7 +1,7 @@
 VERSION = (0, 1, 0, 'alpha', 0)
 
 
-def get_version(version=None):
+def get_version(version=None):  # pragma: no cover
     """
     Returns a PEP 386-compliant version number from VERSION.
     """
@@ -32,7 +32,7 @@ def get_version(version=None):
     return str(main + sub)
 
 
-def get_git_changeset():
+def get_git_changeset():  # pragma: no cover
     """
     Returns a numeric identifier of the latest git changeset.
 
