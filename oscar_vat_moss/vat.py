@@ -1,5 +1,9 @@
+from __future__ import unicode_literals
+
 from decimal import Decimal as D
 import re
+
+from gettext import gettext as _
 
 import vat_moss.billing_address
 import vat_moss.id
@@ -84,7 +88,7 @@ def lookup_vat(company, city, country_code, postcode, phone_number, vatin):
 
     if vatin:
         try:
-            rate = lookup_vat_by_vatin(vatin, company)
+            rate = lookup_vat_by_vatin(country_code, vatin, company)
             # TODO: Test if we have our own VATIN, and do apply VAT if
             # shipping country is the same as the store's own country.
             return rate
@@ -122,12 +126,19 @@ def lookup_vat(company, city, country_code, postcode, phone_number, vatin):
     return address_vat_rate
 
 
-def lookup_vat_by_vatin(vatin, company_name):
+def lookup_vat_by_vatin(country_code, vatin, company_name):
     # We already validated the VATIN through a form validator;
     # additional validation errors here shouldn't happen.
     (vatin_country,
      vatin_normalized,
      vatin_company) = vat_moss.id.validate(u(vatin))
+
+    # Does the VATIN match the country we've been given?
+    if vatin_country != country_code:
+        message = _("VATIN %s is not from %s" % (vatin,
+                                                 country_code))
+        raise VATAssessmentException(message)
+
     # Does the VATIN match the company name we've been given?
     #
     # This is effectively a case-insensitive startswith(), but the
@@ -169,7 +180,12 @@ def calculate_tax(price, rate):
 
 
 class VATAssessmentException(Exception):
-    pass
+
+    def __init__(self, message=None):
+        self.message = message
+
+    def __str__(self):
+        return self.message
 
 
 class VATAssessmentUnavailableException(VATAssessmentException):
@@ -179,7 +195,7 @@ class VATAssessmentUnavailableException(VATAssessmentException):
 class NonMatchingVATINException(VATAssessmentException):
 
     def __init__(self, vatin, company_name):
-        self.message = 'VATIN %s does not match company name %s' % \
-                       (vatin, company_name)
+        self.message = _('VATIN %s does not match company name "%s"' %
+                         (vatin, company_name))
         self.vatin = vatin
         self.company_name = company_name

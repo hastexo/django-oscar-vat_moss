@@ -52,26 +52,27 @@ class PhoneNumberTest(unittest.TestCase):
 
 class VATINTest(unittest.TestCase):
     VALID_VATINS = (
-        # VATIN         # Company name
-        ('ATU66688202', 'hastexo Professional Services GmbH'),
-        ('ATU66688202', 'HASTEXO PROFESSIONAL SERVICES GMBH'),
-        ('ATU66688202', 'hastexo Professional Services GmbH (Procurement Department)'),
+        # Country code  # VATIN        # Company name
+        ('AT',          'ATU66688202', 'hastexo Professional Services GmbH'),
+        ('AT',          'ATU66688202', 'HASTEXO PROFESSIONAL SERVICES GMBH'),
+        ('AT',          'ATU66688202', 'hastexo Professional Services GmbH (Procurement Department)'),
         )
     INVALID_VATINS = (
-        # VATIN         # Incorrect company name
-        ('ATU66688202', 'Example, Inc.'),
-        ('ATU66688202', 'hastexo'),
+        # Country code  # VATIN        # Company name
+        ('AT',          'ATU66688202', 'Example, Inc.'),
+        ('AT',          'ATU66688202', 'hastexo'),
+        ('DE',          'ATU66688202', 'hastexo Professional Services GmbH'),
         )
 
     def test_matching_vatin(self):
-        for vatin, name in self.VALID_VATINS:
-            result_rate = vat.lookup_vat_by_vatin(vatin, name)
+        for country_code, vatin, name in self.VALID_VATINS:
+            result_rate = vat.lookup_vat_by_vatin(country_code, vatin, name)
             self.assertEqual(result_rate, D('0.00'))
 
     def test_non_matching_vatin(self):
-        for vatin, name in self.INVALID_VATINS:
-            with self.assertRaises(vat.NonMatchingVATINException):
-                result_rate = vat.lookup_vat_by_vatin(vatin, name)
+        for country_code, vatin, name in self.INVALID_VATINS:
+            with self.assertRaises(vat.VATAssessmentException):
+                result_rate = vat.lookup_vat_by_vatin(country_code, vatin, name)
 
 
 class PhoneNumberAddressTest(unittest.TestCase):
