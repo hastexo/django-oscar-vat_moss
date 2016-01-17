@@ -48,7 +48,6 @@ INSTALLED_APPS = [
 ] + get_core_apps([
     'oscar_vat_moss.address',
     'oscar_vat_moss.checkout',
-    'oscar_vat_moss.payment',
     'oscar_vat_moss.partner',
     'oscar_vat_moss.order',
 ])
