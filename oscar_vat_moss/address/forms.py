@@ -32,10 +32,14 @@ class UserAddressForm(CoreUserAddressForm):
         if vatin:
             try:
                 vat.lookup_vat_by_vatin(country_code, vatin, company)
+            except vat.NonMatchingVATINException as n:
+                self.add_error('line1', str(n))
+                self.add_error('vatin', str(n))
+            except vat.CountryInvalidForVATINException as c:
+                self.add_error('country', str(c))
+                self.add_error('vatin', str(c))
             except Exception as e:
-                message = _("VATIN does not match country: %s" % str(e))
-                self.add_error('line1', message)
-                self.add_error('vatin', message)
+                self.add_error('vatin', str(e))
 
         # Get the tax rate for the city/country/postcode combination
         if city and country_code:

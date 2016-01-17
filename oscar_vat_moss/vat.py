@@ -199,3 +199,11 @@ class NonMatchingVATINException(VATAssessmentException):
                          (vatin, company_name))
         self.vatin = vatin
         self.company_name = company_name
+
+
+class CountryInvalidForVATINException(VATAssessmentException):
+    def __init__(self, vatin, country):
+        self.message = _('VATIN %s is not from "%s"' %
+                         (vatin, country))
+        self.vatin = vatin
+        self.country = country
