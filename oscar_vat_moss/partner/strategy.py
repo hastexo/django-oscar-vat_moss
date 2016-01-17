@@ -74,5 +74,5 @@ class PerUserVATStrategy(strategy.UseFirstStockRecord, strategy.FixedRateTax,
             return D('0.00')
 
 
-# PerUserVATSelector is the safer option, make that the default
-Selector = PerUserVATSelector
+# DeferredVATSelector is the safer option, make that the default
+Selector = DeferredVATSelector
