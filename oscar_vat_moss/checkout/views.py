@@ -1,4 +1,5 @@
 from oscar.apps.checkout.views import PaymentDetailsView as CorePaymentDetailsView  # noqa
+from oscar.apps.checkout.views import ThankYouView as CoreThankYouView  # noqa
 from django.contrib import messages
 
 from oscar_vat_moss import vat
@@ -24,3 +25,16 @@ class PaymentDetailsView(CorePaymentDetailsView):
             message = str(e)
             messages.error(self.request, message)
         return submission
+
+
+class ThankYouView(CoreThankYouView):
+
+    def get_context_data(self, **kwargs):
+        ctx = super(ThankYouView,
+                    self).get_context_data(**kwargs)
+
+        # Oscar's checkout templates look for this variable which specifies to
+        # break out the tax totals into a separate subtotal.
+        ctx['show_tax_separately'] = True
+
+        return ctx
