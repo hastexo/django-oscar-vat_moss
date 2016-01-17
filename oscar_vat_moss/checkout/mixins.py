@@ -20,31 +20,6 @@ class VATCheckoutSessionMixin(session.CheckoutSessionMixin):
 
         return ctx
 
-    def check_a_valid_shipping_address_is_captured(self):
-        """Check that the just-captured shipping address is valid.
-
-        There is one thing that we can't do through a normal field
-        validator, and that is to check multiple form fields against
-        one another. We have to that for VAT: check whether the phone
-        country code matches the country, whether the phone area code
-        matches the postcode (in case of a user living in a VAT
-        exception territory), and whether or not any VATIN that the
-        user entered matches the registered company name. So, we do
-        that here.
-
-        """
-        super(VATCheckoutSessionMixin, self)
-        shipping_address = self.get_shipping_address(
-            basket=self.request.basket)
-        try:
-            vat.lookup_vat_for_address(shipping_address)
-        except vat.VATAssessmentException as e:
-            message = _("%s. Please try again." % str(e))
-            raise exceptions.FailedPreCondition(
-                url=reverse('checkout:shipping-address'),
-                message=message
-            )
-
 
 class FixedRateVATCheckoutSessionMixin(VATCheckoutSessionMixin):
 
