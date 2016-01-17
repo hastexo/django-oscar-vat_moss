@@ -43,7 +43,15 @@ class UserAddressForm(CoreUserAddressForm):
                 address_vat_rate = vat.lookup_vat_by_city(country_code,
                                                           postcode,
                                                           city)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
+                # We don't hit this exception because of an invalid
+                # postcode: that would already have been caught
+                # by the field validator. Neither the superclass form
+                # validator nor the tax lookup can determine whether
+                # the postcode matches the city, either. So the only
+                # reason why we'd get here is because VAT lookup
+                # failed, presumably because the web service was
+                # temporarily unavailable.
                 message = _("Unable to determine the "
                             "applicable VAT rate for "
                             "your address: %s" % str(e))
@@ -58,7 +66,12 @@ class UserAddressForm(CoreUserAddressForm):
             try:
                 phone_vat_rate = vat.lookup_vat_by_phone_number(phone_number,
                                                                 country_code)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
+                # We don't hit this exception because of an invalid
+                # phone number: that would already have been caught by
+                # the field validator. The only reason why we'd get
+                # here is because VAT lookup failed, presumably
+                # because the web service was temporarily unavailable.
                 message = _("Unable to determine the "
                             "applicable VAT rate for "
                             "your phone number: %s" % str(e))
