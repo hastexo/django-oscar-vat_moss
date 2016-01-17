@@ -101,6 +101,7 @@ class TestShippingAddressView(CheckoutMixin, WebTestCase):
         form['line1'] = '1 King Street'
         form['line4'] = 'Gotham City'
         form['postcode'] = 'N1 7RR'
+        form['phone_number'] = '+44 1273 555 999'
         response = form.submit()
         self.assertRedirectsTo(response, 'checkout:shipping-method')
 

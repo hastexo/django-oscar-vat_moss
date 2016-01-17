@@ -31,10 +31,26 @@ class UserAddressFormTest(TestCase):
             line4="Brighton",
             postcode="BN1 6XX",
             country=self.uk.iso_3166_1_a2,
+            phone_number='+44 1273 555 999',
         )
         form = UserAddressForm(self.johndoe,
                                data)
         self.assertTrue(form.is_valid())
+
+    def test_missing_phone_number(self):
+        # Is a valid address identified correctly?
+        data = dict(
+            user=self.johndoe,
+            first_name="John",
+            last_name="Doe",
+            line1="123 No Such Street",
+            line4="Brighton",
+            postcode="BN1 6XX",
+            country=self.uk.iso_3166_1_a2,
+        )
+        form = UserAddressForm(self.johndoe,
+                               data)
+        self.assertFalse(form.is_valid())
 
     def test_valid_vatin(self):
         # Is a valid VATIN identified correctly?
@@ -47,6 +63,7 @@ class UserAddressFormTest(TestCase):
             postcode="1010",
             country=self.at.iso_3166_1_a2,
             vatin='ATU66688202',
+            phone_number='+43 1 555 9999',
         )
         form = UserAddressForm(self.hansmueller,
                                data)
