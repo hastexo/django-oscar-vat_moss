@@ -1,6 +1,12 @@
 from oscar.apps.checkout import session
 from oscar_vat_moss import vat
 
+from . import assert_required_fields_set_correctly
+
+# Make sure OSCAR_REQUIRED_ADDRESS_FIELDS is set correctly for VAT
+# assessment
+assert_required_fields_set_correctly()
+
 
 class VATCheckoutSessionMixin(session.CheckoutSessionMixin):
 

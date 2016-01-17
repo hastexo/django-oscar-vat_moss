@@ -146,6 +146,16 @@ OSCAR_INITIAL_ORDER_STATUS = 'A'
 NOSE_ARGS = ['-s', '--with-spec']
 OSCAR_SHOP_NAME = 'oscar_vat_moss Sandbox'
 
+OSCAR_REQUIRED_ADDRESS_FIELDS = [
+    'first_name',
+    'last_name',
+    'line1',
+    'city',
+    'postcode',
+    'country',
+    'phone_number'
+]
+
 VAT_MOSS_STORE_COUNTRY_CODE = 'AT'
 VAT_MOSS_STORE_CITY = 'Vienna'
 VAT_MOSS_STORE_POSTCODE = '1010'
