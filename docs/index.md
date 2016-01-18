@@ -57,3 +57,15 @@ This app currently does not:
 - automatically generate regulation-compliant invoices.
 - automatically generate any aggregated information that you can
   easily use for a VATMOSS return.
+
+
+## Requirements
+
+This Oscar extension has been tested with Django 1.8 and Oscar
+1.1. Django 1.9 support is planned for the Oscar 1.2 release. There
+are no plans to support Django 1.7 or Oscar 1.0.
+
+The [CI
+infrastructure](https://travis-ci.org/hastexo/django-oscar-vat_moss)
+currently runs all unit and integration tests on Python 2.7, 3.3, and
+3.4, so all those Python versions should be considered supported.
