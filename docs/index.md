@@ -39,9 +39,10 @@ This app is currently able to:
 - collect a customer's VATIN and verify it against registered their
   registered company name and registration country
 - apply the correct VAT rate to an order during checkout, if using a
-  DeferredTax strategy
+  [DeferredTax](http://django-oscar.readthedocs.org/en/latest/_modules/oscar/apps/partner/strategy.html#DeferredTax)
+  strategy
 - display VAT-inclusive prices at correct VAT rates to logged-in
-  users, if using a FixedRateTax strategy
+  users, if using a [FixedRateTax](http://django-oscar.readthedocs.org/en/latest/_modules/oscar/apps/partner/strategy.html#FixedRateTax) strategy
 - create a zero-rate order if VATIN is given and has been properly
   verified (for B2B transactions)
 
