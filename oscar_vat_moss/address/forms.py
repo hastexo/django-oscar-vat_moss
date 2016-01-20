@@ -18,7 +18,11 @@ class UserAddressForm(CoreUserAddressForm):
         # Grab the interesting fields from the form
         company = data.get('line1')
         city = data.get('line4')
-        country_code = data.get('country').code
+        country = data.get('country')
+        if country:
+            country_code = data.get('country').code
+        else:
+            country_code = ''
         postcode = data.get('postcode')
         phone_number = data.get('phone_number')
         vatin = data.get('vatin')

@@ -21,6 +21,12 @@ class UserAddressFormTest(TestCase):
         self.de = Country.objects.create(
             iso_3166_1_a2='DE', name="GERMANY")
 
+    def test_empty_address(self):
+        data = dict(user=self.johndoe)
+        form = UserAddressForm(self.johndoe,
+                               data)
+        self.assertFalse(form.is_valid())
+
     def test_valid_address(self):
         # Is a valid address identified correctly?
         data = dict(
