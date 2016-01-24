@@ -42,6 +42,14 @@ class UserAddressForm(CoreUserAddressForm):
             except vat.CountryInvalidForVATINException as c:
                 self.add_error('country', str(c))
                 self.add_error('vatin', str(c))
+            except vat.VATINCountrySameAsStoreException:
+                # The VATIN is valid, though we still have to charge
+                # VAT as the VATIN is from the same country as the
+                # store.
+                #
+                # TODO: It would be great if we could flag this to the
+                # user via the messages framework.
+                pass
             except Exception as e:
                 self.add_error('vatin', str(e))
 

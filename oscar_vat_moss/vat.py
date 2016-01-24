@@ -14,6 +14,8 @@ from vat_moss.errors import WebServiceError, WebServiceUnavailableError
 
 from oscar_vat_moss.util import u
 
+from django.conf import settings
+
 VERIFICATIONS_NEEDED = 2
 
 
@@ -77,13 +79,15 @@ def lookup_vat(company, city, country_code, postcode, phone_number, vatin):
 
     if vatin:
         try:
-            rate = lookup_vat_by_vatin(country_code, vatin, company)
-            # TODO: Test if we have our own VATIN, and do apply VAT if
-            # shipping country is the same as the store's own country.
-            return rate
+            return lookup_vat_by_vatin(country_code, vatin, company)
         except InvalidError:
             message = "Invalid VAT Identification Number (VATIN)"
             raise VATAssessmentException(message)
+        except VATINCountrySameAsStoreException:
+            # While we have a valid VATIN, its country is the same as
+            # that of the store, so reverse charge cannot
+            # apply. Assess VAT per the standard method.
+            pass
 
     if city and country_code:
         try:
@@ -124,9 +128,8 @@ def lookup_vat_by_vatin(country_code, vatin, company_name):
 
     # Does the VATIN match the country we've been given?
     if vatin_country != country_code:
-        message = _("VATIN %s is not from %s" % (vatin,
-                                                 country_code))
-        raise VATAssessmentException(message)
+        raise CountryInvalidForVATINException(vatin,
+                                              country_code)
 
     # Does the VATIN match the company name we've been given?
     #
@@ -136,9 +139,14 @@ def lookup_vat_by_vatin(country_code, vatin, company_name):
     if not re.search(regex, company_name, re.I):
         raise NonMatchingVATINException(vatin,
                                         company_name)
+
     # We have a verified VATIN and it matches the company
-    # name. Reverse charge applies.
-    #
+    # name. Is the country the same as the store country?
+    if country_code == settings.VAT_MOSS_STORE_COUNTRY_CODE:
+        raise VATINCountrySameAsStoreException(vatin,
+                                               country_code)
+
+    # We have a verified, foreign VATIN. Reverse charge applies.
     return D('0.00')
 
 
@@ -193,6 +201,14 @@ class NonMatchingVATINException(VATAssessmentException):
 class CountryInvalidForVATINException(VATAssessmentException):
     def __init__(self, vatin, country):
         self.message = _('VATIN %s is not from "%s"' %
+                         (vatin, country))
+        self.vatin = vatin
+        self.country = country
+
+
+class VATINCountrySameAsStoreException(VATAssessmentException):
+    def __init__(self, vatin, country):
+        self.message = _('VATIN %s is from same country as store (%s)' %
                          (vatin, country))
         self.vatin = vatin
         self.country = country
