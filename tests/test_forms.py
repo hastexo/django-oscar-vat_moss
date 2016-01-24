@@ -4,6 +4,7 @@ from __future__ import print_function, unicode_literals
 from django.test import TestCase
 from oscar.core.compat import get_user_model
 from oscar_vat_moss.address.forms import UserAddressForm
+from oscar_vat_moss.dashboard.catalogue.forms import ProductClassForm
 from oscar_vat_moss.address.models import Country
 
 User = get_user_model()
@@ -146,4 +147,44 @@ class UserAddressFormTest(TestCase):
         )
         form = UserAddressForm(self.hansmueller,
                                data)
+        self.assertFalse(form.is_valid())
+
+
+class ProductClassFormTest(TestCase):
+
+    def test_empty_form(self):
+        data = {}
+        form = ProductClassForm(data)
+        self.assertFalse(form.is_valid())
+
+    def test_valid_if_digital_goods_false(self):
+        data = { 'name': 'something',
+                 'requires_shipping': False,
+                 'digital_goods': False,
+                 'track_stock': False }
+        form = ProductClassForm(data)
+        self.assertTrue(form.is_valid())
+
+    def test_valid_if_digital_goods_true_and_requires_shipping_true(self):
+        data = { 'name': 'something',
+                 'requires_shipping': True,
+                 'digital_goods': True,
+                 'track_stock': False }
+        form = ProductClassForm(data)
+        self.assertTrue(form.is_valid())
+
+    def test_valid_if_digital_goods_false_and_requires_shipping_true(self):
+        data = { 'name': 'something',
+                 'requires_shipping': True,
+                 'digital_goods': False,
+                 'track_stock': False }
+        form = ProductClassForm(data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_if_digital_goods_true_and_requires_shipping_false(self):
+        data = { 'name': 'something',
+                 'requires_shipping': False,
+                 'digital_goods': True,
+                 'track_stock': False }
+        form = ProductClassForm(data)
         self.assertFalse(form.is_valid())

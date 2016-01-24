@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'oscar_vat_moss.address',
     'oscar_vat_moss.catalogue',
     'oscar_vat_moss.checkout',
+    'oscar_vat_moss.dashboard.catalogue',
     'oscar_vat_moss.partner',
     'oscar_vat_moss.order',
 ])
