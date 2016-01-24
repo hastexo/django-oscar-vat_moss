@@ -127,6 +127,16 @@ class PhoneNumberAddressTest(TestCase):
           'country': 'AT',
           'postcode': 6691},
          "+43 1 123 4567"),
+        # Empty phone number, only able to check address
+        ({'line4': 'Jungholz',
+          'country': 'AT',
+          'postcode': 6691},
+         ""),
+        # Empty phone number, only able to check phone number
+        ({ 'line4': '',
+           'country': 'DE',
+           'postcode': '' },
+         "+43 123 456 789"),
     )
 
     def test_valid_combination(self):
