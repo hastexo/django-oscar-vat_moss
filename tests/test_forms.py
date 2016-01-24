@@ -92,6 +92,22 @@ class UserAddressFormTest(TestCase):
                                data)
         self.assertFalse(form.is_valid())
 
+    def test_vatin_wrong_country(self):
+        # Is an invalid VATIN identified correctly?
+        data = dict(
+            user=self.hansmueller,
+            first_name="Hans",
+            last_name="Müller",
+            line1="hastexo Professional Services GmbH",
+            line4="Wien",
+            postcode="1010",
+            country=self.uk.iso_3166_1_a2,
+            vatin='ATU66688202',
+        )
+        form = UserAddressForm(self.hansmueller,
+                               data)
+        self.assertFalse(form.is_valid())
+
     def test_non_matching_vatin(self):
         # Is a VATIN that is correct, but doesn't match the company
         # name, identified correctly?
