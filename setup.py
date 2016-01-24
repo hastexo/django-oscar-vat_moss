@@ -5,6 +5,8 @@ from oscar_vat_moss import get_version
 
 setup(
     name='django-oscar-vat_moss',
+    author='hastexo',
+    author_email='code@hastexo.com',
     version=get_version(),
     url='https://github.com/hastexo/django-oscar-vat_moss',
     description=(
