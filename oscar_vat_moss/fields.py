@@ -1,4 +1,4 @@
-from django.db.models.fields import CharField
+from django.db.models.fields import CharField, NullBooleanField
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -23,6 +23,17 @@ def vatin(verbose_name=_('VAT Identification Number (VATIN)'),
                       verify_exists=verify_exists,
                       blank=blank,
                       help_text=help_text)
+
+
+def digital_goods(verbose_name=_('Digital Goods?'),
+                  name='digital_goods',
+                  help_text=_("Indicates that products in this class are "
+                              "Digital Goods per EU VAT regulations, "
+                              "meaning the customer's location determines "
+                              "the applicable VAT rate.")):
+    return NullBooleanField(verbose_name=verbose_name,
+                            name=name,
+                            help_text=help_text)
 
 
 class VATINField(CharField):
