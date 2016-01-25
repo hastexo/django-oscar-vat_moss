@@ -84,3 +84,8 @@ Add ``oscar_vat_moss.checkout.session.CheckoutSessionMixin`` to your
 
     from oscar_vat_moss.checkout.session import CheckoutSessionMixin
 
+Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional documentation can be found at
+http://django-oscar-vat-moss.readthedocs.org/en/master/.
