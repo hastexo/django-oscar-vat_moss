@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from oscar_vat_moss import get_version
 
 setup(
-    name='django-oscar-vat_moss',
+    name='django-oscar-vat-moss',
     author='hastexo',
     author_email='code@hastexo.com',
     version=get_version(),
@@ -18,8 +18,8 @@ setup(
     packages=find_packages(exclude=['sandbox*', 'tests*']),
     include_package_data=True,
     install_requires=[
-        'requests>=1.0',
-        'django-localflavor'],
+        'vat-moss',
+    ],
     extras_require={
         'oscar': ["django-oscar>=1.1"]
     },
